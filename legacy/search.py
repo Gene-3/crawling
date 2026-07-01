@@ -16,8 +16,11 @@ import math
 from FlagEmbedding import BGEM3FlagModel
 from collections import defaultdict
 
-OUT_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(OUT_DIR, "review_texts.db")
+BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR  = os.path.join(BASE_DIR, '..')
+MODEL_DIR = os.path.join(ROOT_DIR, 'models')
+DATA_DIR  = os.path.join(ROOT_DIR, 'data')
+DB_PATH = os.path.join(DATA_DIR, "review_texts.db")
 
 
 class MovieRecommender:
@@ -26,14 +29,14 @@ class MovieRecommender:
         self.model = BGEM3FlagModel('BAAI/bge-m3', use_fp16=True, device='cuda')
 
         print("인덱스 로딩 중...")
-        self.index_movie  = faiss.read_index(os.path.join(OUT_DIR, "faiss_movie.index"))
-        self.index_review = faiss.read_index(os.path.join(OUT_DIR, "faiss_review.index"))
+        self.index_movie  = faiss.read_index(os.path.join(MODEL_DIR, "faiss_movie.index"))
+        self.index_review = faiss.read_index(os.path.join(MODEL_DIR, "faiss_review.index"))
         self.index_review.nprobe = nprobe
 
-        with open(os.path.join(OUT_DIR, "movie_meta.pkl"),  "rb") as f:
+        with open(os.path.join(MODEL_DIR, "movie_meta.pkl"),  "rb") as f:
             self.movie_meta = pickle.load(f)
 
-        with open(os.path.join(OUT_DIR, "review_meta.pkl"), "rb") as f:
+        with open(os.path.join(DATA_DIR, "review_meta.pkl"), "rb") as f:
             review_meta = pickle.load(f)
 
         self.review_movie_key = [r[0] for r in review_meta]
@@ -66,9 +69,9 @@ class MovieRecommender:
 
     def _load_sentiment_model(self):
         """학습된 Keras GRU 감성분류 모델 로드"""
-        model_path  = os.path.join(OUT_DIR, "sentiment_64.keras")
-        tok_path    = os.path.join(OUT_DIR, "sentiment_tokenizer_64.pkl")
-        config_path = os.path.join(OUT_DIR, "sentiment_config_64.pkl")
+        model_path  = os.path.join(MODEL_DIR, "sentiment_64.keras")
+        tok_path    = os.path.join(MODEL_DIR, "sentiment_tokenizer_64.pkl")
+        config_path = os.path.join(MODEL_DIR, "sentiment_config_64.pkl")
 
         if not os.path.exists(model_path):
             print("  감성분류 모델 없음 — 감성 필터 비활성화")
