@@ -5,6 +5,7 @@ import math
 import pickle
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(BASE_DIR, '..', 'models')
 
 
 def wilson_lower_bound(positive, total, z=1.96):
@@ -50,13 +51,13 @@ KW_KR = {
 
 class KeywordService:
     def __init__(self):
-        idx_path = os.path.join(BASE_DIR, "keyword_index.pkl")
-        genre_path = os.path.join(BASE_DIR, "genre_map.pkl")
-        meta_path = os.path.join(BASE_DIR, "movie_meta.pkl")
+        idx_path = os.path.join(MODEL_DIR, "keyword_index.pkl")
+        genre_path = os.path.join(MODEL_DIR, "genre_map.pkl")
+        meta_path = os.path.join(MODEL_DIR, "movie_meta.pkl")
 
         if not os.path.exists(idx_path):
             raise FileNotFoundError(
-                "keyword_index.pkl이 없습니다. build_keyword_index.py를 먼저 실행하세요.")
+                "keyword_index.pkl이 없습니다. training/build_keyword_index.py를 먼저 실행하세요.")
 
         with open(idx_path, 'rb') as f:
             self.keyword_index = pickle.load(f)

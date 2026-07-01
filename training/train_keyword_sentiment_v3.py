@@ -25,8 +25,11 @@ from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout, SpatialDrop
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH  = os.path.join(BASE_DIR, "review_texts.db")
+BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR  = os.path.join(BASE_DIR, '..')
+MODEL_DIR = os.path.join(ROOT_DIR, 'models')
+DATA_DIR  = os.path.join(ROOT_DIR, 'data')
+DB_PATH   = os.path.join(DATA_DIR, "review_texts.db")
 
 VOCAB_SIZE = 30_000
 MAX_LEN    = 80
@@ -94,7 +97,7 @@ def build_model(num_words):
 
 def main():
     print("review_meta 로드...")
-    with open(os.path.join(BASE_DIR, "review_meta.pkl"), 'rb') as f:
+    with open(os.path.join(DATA_DIR, "review_meta.pkl"), 'rb') as f:
         review_meta = pickle.load(f)
     print(f"  전체 리뷰: {len(review_meta):,}건")
 
@@ -145,7 +148,7 @@ def main():
     model = build_model(num_words)
     model.summary()
 
-    ckpt_path = os.path.join(BASE_DIR, 'keyword_best_v3.keras')
+    ckpt_path = os.path.join(MODEL_DIR, 'keyword_best_v3.keras')
     model.fit(
         tr_X, tr_labels,
         epochs=EPOCHS, batch_size=BATCH, validation_split=0.1,
@@ -160,10 +163,10 @@ def main():
     print("\n=== 분류 성능 (v3: 500k×2, 8~9/2~3) ===")
     print(classification_report(te_labels.astype(int), te_pred, target_names=['부정', '긍정']))
 
-    model.save(os.path.join(BASE_DIR, "keyword_sentiment_v3.keras"))
-    with open(os.path.join(BASE_DIR, "keyword_tokenizer_v3.pkl"), 'wb') as f:
+    model.save(os.path.join(MODEL_DIR, "keyword_sentiment_v3.keras"))
+    with open(os.path.join(MODEL_DIR, "keyword_tokenizer_v3.pkl"), 'wb') as f:
         pickle.dump(tok, f)
-    with open(os.path.join(BASE_DIR, "keyword_config_v3.pkl"), 'wb') as f:
+    with open(os.path.join(MODEL_DIR, "keyword_config_v3.pkl"), 'wb') as f:
         pickle.dump({
             'vocab_size': VOCAB_SIZE,
             'num_words': num_words,

@@ -1,119 +1,108 @@
-# 영화 추천 서비스
+# 🎬 영화 키워드 감성 추천 서비스
 
 **22503110159 김광진 · AI 서비스 프로그래밍**
 
-Letterboxd 리뷰 **4,021만 건** 수집 기반 영화 추천 서비스.  
-기존 의미 검색 서비스에서 LSTM 키워드 감성 추천 서비스로 개선했습니다.
+![Python](https://img.shields.io/badge/Python-3.9-blue?logo=python&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.20-orange?logo=tensorflow&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-Latest-red?logo=streamlit&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-> 📄 발표 자료: [`발표자료_기존서비스.pdf`](발표자료_기존서비스.pdf)  
-> 🎬 시연 영상: [`시연영상.mp4`](시연영상.mp4)
+> Letterboxd 리뷰 **4,021만 건** 수집 기반 영화 추천 서비스.  
+> 기존 의미 검색(BGE-M3 + FAISS + GRU)에서 **LSTM 키워드 감성 추천**으로 개선.
 
----
-
-## 서비스 변경 이력
-
-### ❌ 기존 서비스 — 의미 검색 (`app.py`)
-
-```
-텍스트 입력 → BGE-M3 임베딩 → FAISS 벡터 검색 → GRU 감성 필터 → 추천
-```
-
-**한계:**
-- 교수님 피드백: "GRU 모델이 굳이 필요한가?"
-- 벡터 검색이 이미 의미 유사 결과를 반환 → 감성 필터의 실질적 역할 불분명
-- 자유 텍스트 입력 → 쿼리 품질에 결과가 크게 좌우됨
-
-### ✅ 현재 서비스 — 키워드 감성 추천 (`app_keyword.py`)
-
-```
-장르 + 키워드 선택 → keyword_index.pkl 조회 → Wilson 하한 랭킹 → 추천
-```
-
-LSTM이 리뷰 문장의 **감성 맥락**을 분류하는 것이 핵심입니다.  
-"tries to be funny but fails" → 부정 / "unexpectedly funny" → 긍정  
-단순 키워드 존재 여부가 아니라 맥락을 구분합니다.
+📄 **발표 자료**: [`docs/발표자료_기존서비스.pdf`](docs/발표자료_기존서비스.pdf)  
+🎬 **시연 영상**: [`docs/시연영상.mp4`](docs/시연영상.mp4)  
+📑 **기술 보고서**: [`docs/technical_report.pdf`](docs/technical_report.pdf)
 
 ---
 
-## 파일 구조
+## 📁 프로젝트 구조
 
 ```
-movie_recommender/
+crawling/
 │
-├── ✅ [현재 서비스 — 키워드 감성 추천]
-│   ├── app_keyword.py              # Streamlit 메인 앱
-│   ├── keyword_service.py          # Wilson 랭킹 추천 로직
-│   ├── build_keyword_index.py      # 키워드 인덱스 사전 계산
-│   ├── keyword_index.pkl           # 사전 계산 인덱스 (서비스 핵심)
-│   ├── genre_map.pkl               # 장르별 영화 목록
-│   ├── movie_meta.pkl              # 영화 메타데이터
-│   ├── keyword_sentiment_v3.keras  # LSTM 모델 (84% accuracy)
-│   ├── keyword_best_v3.keras       # EarlyStopping 체크포인트
-│   ├── keyword_tokenizer_v3.pkl    # 토크나이저
-│   ├── keyword_config_v3.pkl       # 학습 설정
-│   ├── run_keyword.bat             # 실행 파일 (더블클릭)
-│   └── train_keyword_sentiment_v3.py  # 학습 스크립트 (배포 버전)
+├── 📂 app/                          # ✅ 현재 서비스 — 키워드 감성 추천
+│   ├── app_keyword.py               #    Streamlit 메인 앱
+│   ├── keyword_service.py           #    Wilson 랭킹 추천 로직
+│   └── run_keyword.bat              #    실행 파일 (더블클릭)
 │
-├── ❌ [기존 서비스 — 의미 검색]
-│   ├── app.py                      # Streamlit 의미 검색 앱
-│   ├── search.py                   # FAISS 검색 로직
-│   ├── api_server.py               # ⚠️ 실행 불가, 참고용 — 추천 로직을 Flask REST API로 노출하는 실험적 확장
-│   │                                #    (search_db.py 미포함 + Oracle DB 연결 정보 없어 실행 불가)
-│   └── run_search.bat              # 실행 파일
+├── 📂 legacy/                       # ❌ 기존 서비스 — 의미 검색 (참고용)
+│   ├── app.py                       #    Streamlit 의미 검색 앱
+│   ├── search.py                    #    FAISS 검색 로직
+│   ├── api_server.py                #    Flask REST API 실험 (실행 불가)
+│   └── run_search.bat               #    실행 파일
 │
-├── [공통 — 데이터 수집 / 학습]
-│   ├── crawl_letterboxd.py         # Letterboxd 크롤러
-│   ├── train_keyword_sentiment.py  # v1 학습 스크립트
-│   ├── train_keyword_sentiment_v2.py  # v2 학습 스크립트
-│   └── review_sample.db            # 리뷰 샘플 (상위 500편 × 100건)
+├── 📂 training/                     # 🧠 데이터 수집 및 모델 학습
+│   ├── train_keyword_sentiment_v3.py  # 배포 버전 (500k×2)
+│   ├── train_keyword_sentiment_v2.py  # v2 (80k×2)
+│   ├── train_keyword_sentiment.py     # v1 (80k×2, 극단값)
+│   ├── build_keyword_index.py         # 키워드 인덱스 사전 계산
+│   └── crawl_letterboxd.py            # Letterboxd 크롤러
 │
-└── [문서]
-    ├── README.md
-    ├── technical_report.docx / .pdf   # 기술 보고서 (표지: 22503110159 김광진)
-    ├── 발표자료_기존서비스.pdf      # 기존 서비스 발표 자료
-    └── 시연영상.mp4                 # 서비스 시연 영상
+├── 📂 models/                       # 💾 학습된 모델 및 인덱스 (Git LFS)
+│   ├── keyword_sentiment_v3.keras   #    LSTM 모델 (84% accuracy) — 배포
+│   ├── keyword_best_v3.keras        #    EarlyStopping 체크포인트
+│   ├── keyword_tokenizer_v3.pkl     #    토크나이저
+│   ├── keyword_config_v3.pkl        #    학습 설정
+│   ├── keyword_index.pkl            #    사전 계산 인덱스 (서비스 핵심)
+│   ├── genre_map.pkl                #    장르별 영화 목록
+│   ├── movie_meta.pkl               #    영화 메타데이터
+│   ├── faiss_movie_db.index         #    FAISS 벡터 인덱스 (기존 서비스용)
+│   ├── sentiment_64.keras           #    GRU 감성 모델 (기존 서비스용)
+│   ├── sentiment_config_64.pkl      #    GRU 설정
+│   └── sentiment_tokenizer_64.pkl   #    GRU 토크나이저
+│
+├── 📂 data/                         # 📊 데이터 파일
+│   └── review_sample.db             #    리뷰 샘플 (상위 500편 × 100건, 14MB)
+│
+├── 📂 docs/                         # 📄 문서
+│   ├── technical_report.docx / .pdf
+│   ├── 발표자료_기존서비스.pdf
+│   └── 시연영상.mp4
+│
+└── README.md
 ```
 
 ---
 
-## 빠른 실행
+## 🚀 빠른 실행
 
 ### 현재 서비스 (키워드 감성 추천)
+
 ```bash
 # 방법 1: 더블클릭
-run_keyword.bat
+app/run_keyword.bat
 
 # 방법 2: 터미널
 conda activate aiservice26
-streamlit run app_keyword.py
+streamlit run app/app_keyword.py
 # → http://localhost:8501
 ```
 
+> **실행에 필요한 파일** (모두 `models/` 폴더에 포함):  
+> `keyword_index.pkl` · `genre_map.pkl` · `movie_meta.pkl`  
+> `keyword_sentiment_v3.keras` · `keyword_tokenizer_v3.pkl`
+
 ### 기존 서비스 (의미 검색) — ⚠️ 실행 불가, 코드 참고용
+
 ```bash
-run_search.bat
-# 또는
-conda activate aiservice26
-streamlit run app.py
+legacy/run_search.bat
 ```
 
-> **현재 서비스 실행에 필요한 파일:** `keyword_index.pkl`, `genre_map.pkl`, `movie_meta.pkl`, `keyword_sentiment_v3.keras`, `keyword_tokenizer_v3.pkl` — 모두 레포에 포함되어 있습니다.
-
-> ⚠️ **기존 서비스는 리뷰 메타데이터(`review_meta.pkl`, 약 1.45GB)가 용량 문제로 레포에 포함되지 않아 실행되지 않습니다.** GRU 감성 모델(`sentiment_64.keras`, `sentiment_tokenizer_64.pkl`)은 크기가 작아 포함되어 있지만, `review_meta.pkl`과 원본 리뷰 DB(`review_texts.db`, 약 11.5GB)가 없어 `search.py`가 정상 동작하지 않습니다. 아키텍처 참고용으로만 남겨둡니다.
+> ⚠️ `review_meta.pkl`(~1.45GB) 및 원본 리뷰 DB(`review_texts.db`, ~11.5GB)가  
+> 용량 문제로 미포함되어 동작하지 않습니다. 아키텍처 참고용으로만 보존합니다.
 
 ---
 
-## 다운로드
+## 📥 설치 및 클론
 
 ```bash
 git clone https://github.com/Gene-3/crawling.git
 cd crawling
-git lfs pull   # FAISS 인덱스 파일 다운로드 (약 1GB)
+git lfs pull   # 대용량 모델 파일 다운로드
 ```
 
----
-
-## 환경 설치
+### 환경 설치
 
 ```bash
 conda create -n aiservice26 python=3.9
@@ -124,45 +113,35 @@ pip install curl_cffi undetected-chromedriver
 
 ---
 
-## 데이터 수집 (크롤링)
+## 🔄 서비스 변경 이력
 
-### Phase 1 — 영화 목록
-- 도구: `undetected-chromedriver` (Chrome 패치, 봇 탐지 우회)
-- 범위: Letterboxd 1960~2026년 연도별 인기 상위 400편 × 66년
-- 수집 항목: 영화 제목, 연도, URL → `movie_meta.pkl`
+| | 기존 서비스 (`legacy/`) | 현재 서비스 (`app/`) |
+|---|---|---|
+| **파일** | `app.py` | `app_keyword.py` |
+| **검색 방식** | 자유 텍스트 → BGE-M3 임베딩 → FAISS | 장르 + 키워드 버튼 선택 |
+| **감성 모델** | GRU (64 units) | LSTM (64 units) |
+| **랭킹** | 코사인 유사도 | Wilson 하한 (z=1.96) |
+| **한계** | 쿼리 품질 의존, 감성 필터 역할 불분명 | 추천 풀 상위 3,000편 제한 |
 
-### Phase 2 — 리뷰 수집
-- 도구: `curl_cffi AsyncSession` (TLS 핑거프린트 위장, 비동기)
-- 결과: **40,217,722건** / ~18,000편
-- 저장: `review_texts.db` (SQLite, 12GB) + `review_meta.pkl` (평점/영화키, 1.5GB)
-- 핵심 설계: Rate-limit 준수 · 재시도 로직 · CJK(한국어) 리뷰 필터링
+### 현재 서비스 흐름
 
-> 원본 DB는 용량 문제로 미포함. 레포에는 상위 500편 × 100건 샘플(`review_sample.db`, 14MB) 포함.
+```
+장르 + 키워드 선택
+    → keyword_index.pkl 조회 (응답 ≈ 0.1초, 런타임 추론 없음)
+    → Wilson 하한 랭킹
+    → 추천 결과 + 리뷰 예시
+```
 
 ---
 
-## 데이터 전처리 및 학습
+## 🧠 모델 학습
 
-```bash
-conda activate aiservice26
-python train_keyword_sentiment_v3.py
-```
+### LSTM 모델 구조
 
-### 전처리 흐름
-```
-review_texts.db + review_meta.pkl
-    → 평점 기준 필터링: 긍정 8~9점 / 부정 2~3점 (극단값 제외)
-    → 클래스 균형: 긍정 500,000건 / 부정 500,000건
-    → 토크나이저 학습 (VOCAB=30,000)
-    → 패딩 (MAX_LEN=80)
-    → 학습/테스트 9:1 분리
-```
-
-### 모델 구조
 ```python
 Sequential([
     Embedding(30001, 64),
-    SpatialDropout1D(0.15),   # 채널 단위 dropout — 임베딩 과적합 억제
+    SpatialDropout1D(0.15),   # 임베딩 과적합 억제
     LSTM(64),
     Dense(32, activation='relu'),
     Dropout(0.2),
@@ -171,36 +150,46 @@ Sequential([
 # Adam(lr=0.001) · binary_crossentropy · EarlyStopping(patience=3)
 ```
 
-> **GRU → LSTM 전환:** 1부 서비스에서는 GRU를 사용했으나, 키워드 감성 분류에는 LSTM이 더 적합하다고 판단해 교체
-
 ### 버전별 성능 비교
 
 | 버전 | 학습 데이터 | 평점 기준 | Accuracy | Recall(긍정) | Recall(부정) | 비고 |
-|------|------------|----------|----------|-------------|-------------|------|
+|------|-----------|---------|---------|------------|------------|------|
 | v1 | 80k × 2 | 9~10 / 1~2 | 84% | 0.746 | 0.856 | 부정 편향 |
 | v2 | 80k × 2 | 8~9 / 2~3 | 84% | 0.853 | 0.830 | 균형 개선 |
 | **v3** | **500k × 2** | **8~9 / 2~3** | **84%** | **0.84** | **0.84** | **균형 달성 (배포)** |
 
----
-
-## 키워드 인덱스 사전 계산
+### 재학습 방법
 
 ```bash
-# 약 30~60분 소요 (모델 변경 시에만 재실행)
-python build_keyword_index.py
-```
+conda activate aiservice26
 
-```
-review_texts.db → 상위 3,000편 선택 → 키워드 포함 문장 추출
-    → LSTM 배치 추론 (batch=512) → 긍정/부정 카운트
-    → keyword_index.pkl + genre_map.pkl 저장
-```
+# 1. 모델 학습 (약 수 시간)
+python training/train_keyword_sentiment_v3.py
 
-런타임에는 모델 추론 없이 pkl 딕셔너리 조회만 수행합니다 (응답 ≈ 0.1초).
+# 2. 키워드 인덱스 재계산 (약 30~60분)
+python training/build_keyword_index.py
+```
 
 ---
 
-## 발생한 문제와 해결
+## 🕷️ 데이터 수집
+
+### Phase 1 — 영화 목록
+- **도구**: `undetected-chromedriver` (Chrome 패치, 봇 탐지 우회)
+- **범위**: Letterboxd 1960~2026 연도별 인기 상위 400편 × 66년
+- **결과**: 영화 제목·연도·URL → `models/movie_meta.pkl`
+
+### Phase 2 — 리뷰 수집
+- **도구**: `curl_cffi AsyncSession` (TLS 핑거프린트 위장, 비동기)
+- **결과**: **40,217,722건** / ~18,000편
+- **저장**: `review_texts.db` (SQLite, 12GB) + `review_meta.pkl` (평점/영화키, 1.5GB)
+- **설계**: Rate-limit 준수 · 재시도 로직 · CJK(한국어) 리뷰 필터링
+
+> 원본 DB는 용량 문제로 미포함. `data/review_sample.db`(14MB)에 상위 500편 × 100건 샘플 포함.
+
+---
+
+## 🛠️ 발생한 문제와 해결
 
 | 문제 | 원인 | 해결 |
 |------|------|------|
@@ -210,16 +199,17 @@ review_texts.db → 상위 3,000편 선택 → 키워드 포함 문장 추출
 
 ---
 
-## 서비스 사용법
+## 📖 서비스 사용법
 
-1. 왼쪽 사이드바에서 **장르** 선택 (8개)
-2. **키워드 버튼** 클릭 (분위기/감정/스토리/연기·기술, 26개)
-3. 여러 개 선택 시 **AND 조건** 교집합 추천
-4. 결과에서 키워드별 긍정 비율(%) + 리뷰 예시 확인
+1. `app/run_keyword.bat` 더블클릭 또는 `streamlit run app/app_keyword.py`
+2. 왼쪽 사이드바에서 **장르** 선택 (8개: Action · Animation · Comedy · Drama · Horror · Romance · Sci-Fi · Thriller)
+3. **키워드 버튼** 클릭 (분위기/감정/스토리/연기·기술, 총 26개)
+4. 여러 개 선택 시 **AND 조건** 교집합 추천
+5. 결과에서 키워드별 긍정 비율(%) + 리뷰 예시 확인
 
 ---
 
-## 한계
+## ⚠️ 한계
 
 - 추천 풀이 리뷰 수 상위 **3,000편**으로 제한 (인기작 편향)
 - 짧거나 모호한 문장에서 오분류 가능

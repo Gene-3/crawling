@@ -24,7 +24,10 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "review_texts.db")
+ROOT_DIR = os.path.join(BASE_DIR, '..')
+MODEL_DIR = os.path.join(ROOT_DIR, 'models')
+DATA_DIR = os.path.join(ROOT_DIR, 'data')
+DB_PATH = os.path.join(DATA_DIR, "review_texts.db")
 
 TOP_MOVIES = 3000
 REVIEWS_PER_MOVIE = 500
@@ -72,10 +75,10 @@ MODEL_SUFFIX = "_v3"
 
 
 def load_model_and_config():
-    model = load_model(os.path.join(BASE_DIR, f"keyword_sentiment{MODEL_SUFFIX}.keras"))
-    with open(os.path.join(BASE_DIR, f"keyword_tokenizer{MODEL_SUFFIX}.pkl"), 'rb') as f:
+    model = load_model(os.path.join(MODEL_DIR, f"keyword_sentiment{MODEL_SUFFIX}.keras"))
+    with open(os.path.join(MODEL_DIR, f"keyword_tokenizer{MODEL_SUFFIX}.pkl"), 'rb') as f:
         tok = pickle.load(f)
-    with open(os.path.join(BASE_DIR, f"keyword_config{MODEL_SUFFIX}.pkl"), 'rb') as f:
+    with open(os.path.join(MODEL_DIR, f"keyword_config{MODEL_SUFFIX}.pkl"), 'rb') as f:
         cfg = pickle.load(f)
     return model, tok, cfg
 
@@ -113,7 +116,7 @@ def main():
         re.IGNORECASE)
 
     print("movie_meta 로드...")
-    with open(os.path.join(BASE_DIR, "movie_meta.pkl"), 'rb') as f:
+    with open(os.path.join(MODEL_DIR, "movie_meta.pkl"), 'rb') as f:
         movie_meta = pickle.load(f)
 
     # 리뷰 수 기준 상위 영화 선택
@@ -126,7 +129,7 @@ def main():
     print(f"  상위 {len(top_keys)}개 영화 선택")
 
     print("review_meta 로드...")
-    with open(os.path.join(BASE_DIR, "review_meta.pkl"), 'rb') as f:
+    with open(os.path.join(DATA_DIR, "review_meta.pkl"), 'rb') as f:
         review_meta = pickle.load(f)
 
     # 상위 영화의 리뷰 인덱스 수집
@@ -237,10 +240,10 @@ def main():
 
     # 저장 (defaultdict → dict 변환)
     kw_out = {kw: dict(movies) for kw, movies in keyword_stats.items()}
-    with open(os.path.join(BASE_DIR, "keyword_index.pkl"), 'wb') as f:
+    with open(os.path.join(MODEL_DIR, "keyword_index.pkl"), 'wb') as f:
         pickle.dump(kw_out, f)
     gm_out = {g: dict(v) for g, v in genre_map.items()}
-    with open(os.path.join(BASE_DIR, "genre_map.pkl"), 'wb') as f:
+    with open(os.path.join(MODEL_DIR, "genre_map.pkl"), 'wb') as f:
         pickle.dump(gm_out, f)
 
     print("\n장르별 영화 수:")
