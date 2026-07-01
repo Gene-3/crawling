@@ -16,7 +16,7 @@ import math
 from FlagEmbedding import BGEM3FlagModel
 from collections import defaultdict
 
-OUT_DIR = r"D:\Lecture\_AIService26\movie_recommender"
+OUT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(OUT_DIR, "review_texts.db")
 
 
