@@ -57,7 +57,8 @@ movie_recommender/
 ├── ❌ [기존 서비스 — 의미 검색]
 │   ├── app.py                      # Streamlit 의미 검색 앱
 │   ├── search.py                   # FAISS 검색 로직
-│   ├── api_server.py               # Flask 서버 (search_db.py 미포함으로 실행 불가)
+│   ├── api_server.py               # ⚠️ 실행 불가, 참고용 — 추천 로직을 Flask REST API로 노출하는 실험적 확장
+│   │                                #    (search_db.py 미포함 + Oracle DB 연결 정보 없어 실행 불가)
 │   └── run_search.bat              # 실행 파일
 │
 ├── [공통 — 데이터 수집 / 학습]
