@@ -4,8 +4,8 @@ review_texts_db.db
 review_meta.pkl
 review_meta_db.pkl
 
-# FAISS 인덱스 (키워드 서비스 불필요)
-*.index
+# FAISS IVF 학습 전용 인덱스 (불필요)
+ivfpq_trained.index
 
 # 구버전 / 미사용 모델
 keyword_sentiment.keras
