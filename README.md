@@ -115,7 +115,7 @@ git lfs pull   # FAISS 인덱스 파일 다운로드 (약 1GB)
 ```bash
 conda create -n aiservice26 python=3.9
 conda activate aiservice26
-pip install tensorflow==2.20.0 streamlit numpy==1.26.4
+pip install tensorflow==2.20.0 streamlit numpy==1.26.4 scikit-learn==1.6.1
 pip install curl_cffi undetected-chromedriver
 ```
 
@@ -168,7 +168,7 @@ Sequential([
 # Adam(lr=0.001) · binary_crossentropy · EarlyStopping(patience=3)
 ```
 
-> **GRU → LSTM 전환 이유:** TF 2.20 + Keras 3 환경에서 GRU loss 0.693 고착 버그 → LSTM으로 교체
+> **GRU → LSTM 전환:** 1부 서비스에서는 GRU를 사용했으나, 키워드 감성 분류에는 LSTM이 더 적합하다고 판단해 교체
 
 ### 버전별 성능 비교
 
@@ -201,7 +201,6 @@ review_texts.db → 상위 3,000편 선택 → 키워드 포함 문장 추출
 
 | 문제 | 원인 | 해결 |
 |------|------|------|
-| GRU 학습 불가 | TF2.20 + Keras3 버그, loss 0.693 고착 | LSTM으로 교체 |
 | 문장 단위 레이블 노이즈 | 문장 추출 후 전체 평점을 레이블로 사용 | 리뷰 전문으로 학습 전환 |
 | 소표본 랭킹 왜곡 | 3/3=100%가 30/34=88% 위에 표시 | Wilson 하한 적용 (z=1.96) |
 | scary 장르 오분류 | "love is scary" 관용구로 로맨스→Horror | 장르 분류 키워드에서만 제외 |
