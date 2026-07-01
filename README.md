@@ -68,7 +68,7 @@ movie_recommender/
 │
 └── [문서]
     ├── README.md
-    ├── technical_report.md
+    ├── technical_report.docx / .pdf   # 기술 보고서 (표지: 22503110159 김광진)
     ├── 발표자료_기존서비스.pdf      # 기존 서비스 발표 자료
     └── 시연영상.mp4                 # 서비스 시연 영상
 ```
