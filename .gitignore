@@ -18,6 +18,10 @@ keyword_config.pkl
 keyword_config_v2.pkl
 sentiment_*.keras
 sentiment_*.pkl
+# 예외: 기존 서비스(search.py)가 실제로 사용하는 GRU 64유닛 모델은 커밋
+!sentiment_64.keras
+!sentiment_tokenizer_64.pkl
+!sentiment_config_64.pkl
 mood_*.keras
 mood_*.pkl
 mood_labels.pkl

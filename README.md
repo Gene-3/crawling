@@ -57,7 +57,7 @@ movie_recommender/
 ├── ❌ [기존 서비스 — 의미 검색]
 │   ├── app.py                      # Streamlit 의미 검색 앱
 │   ├── search.py                   # FAISS 검색 로직
-│   ├── api_server.py               # FastAPI 서버
+│   ├── api_server.py               # Flask 서버 (search_db.py 미포함으로 실행 불가)
 │   └── run_search.bat              # 실행 파일
 │
 ├── [공통 — 데이터 수집 / 학습]
@@ -88,7 +88,7 @@ streamlit run app_keyword.py
 # → http://localhost:8501
 ```
 
-### 기존 서비스 (의미 검색)
+### 기존 서비스 (의미 검색) — ⚠️ 실행 불가, 코드 참고용
 ```bash
 run_search.bat
 # 또는
@@ -97,6 +97,8 @@ streamlit run app.py
 ```
 
 > **현재 서비스 실행에 필요한 파일:** `keyword_index.pkl`, `genre_map.pkl`, `movie_meta.pkl`, `keyword_sentiment_v3.keras`, `keyword_tokenizer_v3.pkl` — 모두 레포에 포함되어 있습니다.
+
+> ⚠️ **기존 서비스는 리뷰 메타데이터(`review_meta.pkl`, 약 1.45GB)가 용량 문제로 레포에 포함되지 않아 실행되지 않습니다.** GRU 감성 모델(`sentiment_64.keras`, `sentiment_tokenizer_64.pkl`)은 크기가 작아 포함되어 있지만, `review_meta.pkl`과 원본 리뷰 DB(`review_texts.db`, 약 11.5GB)가 없어 `search.py`가 정상 동작하지 않습니다. 아키텍처 참고용으로만 남겨둡니다.
 
 ---
 
