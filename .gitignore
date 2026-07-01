@@ -1,0 +1,48 @@
+# 원본 대용량 데이터 (샘플만 포함)
+review_texts.db
+review_texts_db.db
+review_meta.pkl
+review_meta_db.pkl
+
+# FAISS 인덱스 (키워드 서비스 불필요)
+*.index
+
+# 구버전 / 미사용 모델
+keyword_sentiment.keras
+keyword_sentiment_v2.keras
+keyword_best.keras
+keyword_best_v2.keras
+keyword_tokenizer.pkl
+keyword_tokenizer_v2.pkl
+keyword_config.pkl
+keyword_config_v2.pkl
+sentiment_*.keras
+sentiment_*.pkl
+mood_*.keras
+mood_*.pkl
+mood_labels.pkl
+mood_labels.csv
+label_log.txt
+
+# 미사용 데이터
+movie_stats.pkl
+movie_meta_db.pkl
+genre_map_db.pkl
+review_meta_db.pkl
+review_texts_db.db
+
+# 캐시 / 임시
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# 평가 결과 JSON (재현 가능)
+eval_*.json
+eval_*.csv
+testset_*.csv
+
+# 로컬 전용
+*.log
+ivfpq_trained.index
+model_backup_r9-10/
