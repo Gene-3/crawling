@@ -100,6 +100,16 @@ streamlit run app.py
 
 ---
 
+## 다운로드
+
+```bash
+git clone https://github.com/Gene-3/crawling.git
+cd crawling
+git lfs pull   # FAISS 인덱스 파일 다운로드 (약 1GB)
+```
+
+---
+
 ## 환경 설치
 
 ```bash
